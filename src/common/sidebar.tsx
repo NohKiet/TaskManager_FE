@@ -136,7 +136,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose, isMobile = false }) => {
               <path d="M20 6L9 17l-5-5" />
             </svg>
           </div>
-          <span className="sidebar-brand">NOHNGULOZ</span>
+          <span className="sidebar-brand">Taskee</span>
         </div>
         {isMobile && onClose && (
           <button className="sidebar-close" onClick={onClose}>
