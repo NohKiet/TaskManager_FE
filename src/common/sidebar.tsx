@@ -126,7 +126,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose, isMobile = false }) => {
           <div className="sidebar-logo">
             <img src={logoGif} alt="logo" />
           </div>
-          <span className="sidebar-brand">Task Manager</span>
+          <span className="sidebar-brand">Taskee</span>
         </div>
         {isMobile && onClose && (
           <button className="sidebar-close" onClick={onClose}>

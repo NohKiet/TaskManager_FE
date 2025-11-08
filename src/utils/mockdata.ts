@@ -87,6 +87,34 @@ export const MOCK_TASKS: ITask[] = [
         updated_at: '2025-11-20T10:00:00Z',
         is_trashed: false,
     },
+    {
+        task_id: 4,
+        title: 'Test tính năng thanh toán',
+        description: 'Kiểm thử các tính năng thanh toán và xử lý giao dịch.',
+        start_date: '2025-10-15',
+        due_date: '2025-10-20',
+        completed_date: null,
+        status: 'completed',
+        priority: 'medium',
+        category: 'Testing',
+        created_at: '2025-10-14T08:00:00Z',
+        updated_at: '2025-11-01T10:00:00Z',
+        is_trashed: true,
+    },
+    {
+        task_id: 5,
+        title: 'Cập nhật tài liệu API',
+        description: 'Cập nhật và bổ sung tài liệu API cho các endpoint mới.',
+        start_date: '2025-10-10',
+        due_date: '2025-10-15',
+        completed_date: null,
+        status: 'completed',
+        priority: 'low',
+        category: 'Documentation',
+        created_at: '2025-10-09T09:00:00Z',
+        updated_at: '2025-10-25T14:30:00Z',
+        is_trashed: true,
+    },
 ];
 
 // --- Mock Task Assignments ---
@@ -95,6 +123,8 @@ export const MOCK_ASSIGNMENTS: ITaskAssignment[] = [
     { assignment_id: 2, user_id: 2, task_id: 2, assigned_date: '2025-11-16T09:00:00Z' },
     { assignment_id: 3, user_id: 3, task_id: 2, assigned_date: '2025-11-16T09:05:00Z' },
     { assignment_id: 4, user_id: 2, task_id: 3, assigned_date: '2025-11-20T10:30:00Z' },
+    { assignment_id: 5, user_id: 1, task_id: 4, assigned_date: '2025-10-14T08:00:00Z' },
+    { assignment_id: 6, user_id: 3, task_id: 5, assigned_date: '2025-10-09T09:00:00Z' },
 ];
 
 // --- Mock Comments ---
