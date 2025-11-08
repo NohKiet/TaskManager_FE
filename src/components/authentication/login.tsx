@@ -1,11 +1,12 @@
 import React, { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { LoginFormInputs } from "./type";
 import { MOCK_USERS } from "../../utils/mockdata";
 import type { IUser } from "../../utils/interfaces";
 import "./login.css";
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<LoginFormInputs>({
     username: MOCK_USERS[0]?.username || "",
     password: "",
@@ -45,8 +46,8 @@ const Login: React.FC = () => {
     // Store user in localStorage for session management
     localStorage.setItem("currentUser", JSON.stringify(user));
 
-    // Redirect to dashboard (or home page)
-    // navigate('/dashboard');
+    // Redirect to dashboard
+    navigate("/dashboard");
   };
 
   return (
