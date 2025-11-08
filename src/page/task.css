@@ -14,10 +14,13 @@
   padding: 2rem;
   background: var(--bg);
   min-height: 100vh;
+  width: calc(100% - 260px);
+  box-sizing: border-box;
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
+  flex: 1;
 }
 
 .tasks-header {
@@ -46,6 +49,8 @@
   margin-bottom: 2rem;
   flex-wrap: wrap;
   min-height: 60px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .view-toggle {
@@ -138,13 +143,20 @@
   background: var(--accent-hover);
 }
 
-/* Kanban Board */
+.tasks-content-wrapper {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 .kanban-board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   margin-top: 1rem;
   min-height: 600px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .kanban-column {
@@ -335,14 +347,20 @@
 .list-view {
   background: var(--card);
   border-radius: 8px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: visible;
   margin-top: 1rem;
   min-height: 600px;
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
 }
 
 .tasks-table {
   width: 100%;
+  min-width: 800px;
   border-collapse: collapse;
+  table-layout: auto;
 }
 
 .tasks-table thead {
@@ -767,9 +785,27 @@
 
 /* Responsive */
 @media (max-width: 1200px) {
+  .tasks-main {
+    width: calc(100% - 260px);
+  }
+
+  .tasks-content-wrapper {
+    width: 100%;
+  }
+
   .kanban-board {
     grid-template-columns: 1fr;
     min-height: 600px;
+    width: 100%;
+  }
+
+  .list-view {
+    min-height: 600px;
+    width: 100%;
+  }
+
+  .tasks-table {
+    min-width: 100%;
   }
 }
 
@@ -777,12 +813,18 @@
   .tasks-main {
     margin-left: 0;
     padding: 1rem;
+    width: 100%;
+  }
+
+  .tasks-content-wrapper {
+    width: 100%;
   }
 
   .tasks-controls {
     flex-direction: column;
     align-items: stretch;
     min-height: auto;
+    width: 100%;
   }
 
   .filters {
@@ -807,10 +849,17 @@
 
   .kanban-board {
     min-height: 500px;
+    width: 100%;
   }
 
   .list-view {
     min-height: 500px;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .tasks-table {
+    min-width: 600px;
   }
 
   .form-row {
@@ -822,4 +871,3 @@
     max-height: calc(100vh - 2rem);
   }
 }
-
