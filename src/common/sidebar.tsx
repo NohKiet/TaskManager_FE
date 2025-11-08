@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import type { IUser } from "../utils/interfaces";
+import logoGif from "../assets/img/logo.gif";
 import "./sidebar.css";
 
 interface SidebarProps {
@@ -123,18 +124,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose, isMobile = false }) => {
       <div className="sidebar-header">
         <div className="sidebar-logo-container">
           <div className="sidebar-logo">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M20 6L9 17l-5-5" />
-            </svg>
+            <img src={logoGif} alt="logo" />
           </div>
           <span className="sidebar-brand">Taskee</span>
         </div>
