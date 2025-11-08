@@ -1,5 +1,5 @@
 import React from "react";
-import Sidebar from "../components/home/sidebar";
+import Sidebar from "../common/sidebar";
 
 const Trash: React.FC = () => {
   return (

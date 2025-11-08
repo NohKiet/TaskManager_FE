@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import Sidebar from "../components/home/sidebar";
+import Sidebar from "../common/sidebar";
 import { MOCK_USERS } from "../utils/mockdata";
 import type { IUser } from "../utils/interfaces";
 import "./team.css";

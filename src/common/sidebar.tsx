@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import type { IUser } from "../../utils/interfaces";
+import type { IUser } from "../utils/interfaces";
 import "./sidebar.css";
 
 interface SidebarProps {
