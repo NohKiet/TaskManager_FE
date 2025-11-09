@@ -7,8 +7,9 @@ const Dashboard: React.FC = () => {
   // derive simple stats from mock tasks
   const today = new Date().toISOString().slice(0, 10);
 
-  const totalCompleted = MOCK_TASKS.filter((t) => t.status === "completed")
-    .length;
+  const totalCompleted = MOCK_TASKS.filter(
+    (t) => t.status === "completed"
+  ).length;
 
   const dueToday = MOCK_TASKS.filter((t) => t.due_date === today).length;
 
@@ -17,15 +18,12 @@ const Dashboard: React.FC = () => {
   ).length;
 
   // priority counts
-  const priorityCounts = MOCK_TASKS.reduce(
-    (acc: Record<string, number>, t) => {
-      const p = (t.priority || "low").toLowerCase();
-      if (p === "urgent") acc["high"] = (acc["high"] || 0) + 1;
-      else acc[p] = (acc[p] || 0) + 1;
-      return acc;
-    },
-    {}
-  );
+  const priorityCounts = MOCK_TASKS.reduce((acc: Record<string, number>, t) => {
+    const p = (t.priority || "low").toLowerCase();
+    if (p === "urgent") acc["high"] = (acc["high"] || 0) + 1;
+    else acc[p] = (acc[p] || 0) + 1;
+    return acc;
+  }, {});
 
   // upcoming: tasks sorted by due_date
   const upcoming = [...MOCK_TASKS]
@@ -34,11 +32,41 @@ const Dashboard: React.FC = () => {
     .slice(0, 5);
 
   const recentActivity = [
-    { id: 1, user: "alice", action: "updated", target: "Design new landing page", status: "In Progress" },
-    { id: 2, user: "alice", action: "updated", target: "Implement user authentication", status: "In Progress" },
-    { id: 3, user: "alice", action: "updated", target: "Write project documentation", status: "To Do" },
-    { id: 4, user: "alice", action: "updated", target: "Fix critical bugs in payment system", status: "To Do" },
-    { id: 5, user: "alice", action: "updated", target: "Review pull requests", status: "Completed" },
+    {
+      id: 1,
+      user: "alice",
+      action: "updated",
+      target: "Design new landing page",
+      status: "In Progress",
+    },
+    {
+      id: 2,
+      user: "alice",
+      action: "updated",
+      target: "Implement user authentication",
+      status: "In Progress",
+    },
+    {
+      id: 3,
+      user: "alice",
+      action: "updated",
+      target: "Write project documentation",
+      status: "To Do",
+    },
+    {
+      id: 4,
+      user: "alice",
+      action: "updated",
+      target: "Fix critical bugs in payment system",
+      status: "To Do",
+    },
+    {
+      id: 5,
+      user: "alice",
+      action: "updated",
+      target: "Review pull requests",
+      status: "Completed",
+    },
   ];
 
   // simple SVG pie segments based on priority counts
@@ -50,9 +78,24 @@ const Dashboard: React.FC = () => {
   // helper to produce SVG arc lengths (simple proportional circle sectors using stroke-dasharray)
   const circleCircumference = 2 * Math.PI * 60; // r=60
   const segments = [] as { color: string; value: number; label: string }[];
-  if (priorityCounts["high"]) segments.push({ color: "#f44336", value: priorityCounts["high"], label: `High: ${priorityCounts["high"]}` });
-  if (priorityCounts["medium"]) segments.push({ color: "#ff9800", value: priorityCounts["medium"], label: `Medium: ${priorityCounts["medium"]}` });
-  if (priorityCounts["low"]) segments.push({ color: "#2ecc71", value: priorityCounts["low"], label: `Low: ${priorityCounts["low"]}` });
+  if (priorityCounts["high"])
+    segments.push({
+      color: "#f44336",
+      value: priorityCounts["high"],
+      label: `High: ${priorityCounts["high"]}`,
+    });
+  if (priorityCounts["medium"])
+    segments.push({
+      color: "#ff9800",
+      value: priorityCounts["medium"],
+      label: `Medium: ${priorityCounts["medium"]}`,
+    });
+  if (priorityCounts["low"])
+    segments.push({
+      color: "#2ecc71",
+      value: priorityCounts["low"],
+      label: `Low: ${priorityCounts["low"]}`,
+    });
 
   let cumulative = 0;
 
@@ -62,8 +105,10 @@ const Dashboard: React.FC = () => {
       <main className="dashboard-main">
         <header className="dashboard-header">
           <div>
-            <h2>Welcome back, alice!</h2>
-            <p className="muted">Here's what's happening with your tasks today</p>
+            <h2>Welcome back, {localStorage.getItem("currentUser")}</h2>
+            <p className="muted">
+              Here's what's happening with your tasks today
+            </p>
           </div>
         </header>
 
@@ -98,7 +143,8 @@ const Dashboard: React.FC = () => {
                     const portion = s.value / (totalPriority || 1);
                     const dash = portion * circleCircumference;
                     const gap = circleCircumference - dash;
-                    const rotation = (cumulative / (totalPriority || 0 || 1)) * 360;
+                    const rotation =
+                      (cumulative / (totalPriority || 0 || 1)) * 360;
                     cumulative += s.value;
                     return (
                       <circle
@@ -120,7 +166,10 @@ const Dashboard: React.FC = () => {
               <div className="chart-legend">
                 {segments.map((s) => (
                   <div key={s.label} className="legend-item">
-                    <span className="legend-swatch" style={{ background: s.color }} />
+                    <span
+                      className="legend-swatch"
+                      style={{ background: s.color }}
+                    />
                     <span className="legend-label">{s.label}</span>
                   </div>
                 ))}
@@ -153,7 +202,8 @@ const Dashboard: React.FC = () => {
                   <span className="activity-dot" />
                   <div>
                     <div>
-                      <strong>{a.user}</strong> {a.action} <strong>{a.target}</strong>
+                      <strong>{a.user}</strong> {a.action}{" "}
+                      <strong>{a.target}</strong>
                     </div>
                     <div className="muted">Changed to {a.status}</div>
                   </div>
