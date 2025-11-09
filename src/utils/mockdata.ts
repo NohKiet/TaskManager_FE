@@ -1,4 +1,4 @@
-import type { IUser, ITask, ITaskAssignment, IComment, INotification } from "../utils/interfaces";
+import type { IUser, ITask, ITaskAssignment, IComment, INotification, IAttachment } from "../utils/interfaces";
 
 
 // Tên tệp: mockData.ts
@@ -117,6 +117,50 @@ export const MOCK_TASKS: ITask[] = [
     },
 ];
 
+// --- Mock Attachments ---
+export const MOCK_ATTACHMENTS: IAttachment[] = [
+    {
+        attachment_id: 1,
+        task_id: 1,
+        file_name: 'requirements_document.pdf',
+        file_type: 'application/pdf',
+        file_size: 245760, // 240 KB
+        file_url: '/attachments/requirements_document.pdf',
+        uploaded_by: 1,
+        uploaded_at: '2025-11-10T09:15:00Z',
+    },
+    {
+        attachment_id: 2,
+        task_id: 2,
+        file_name: 'database_design.png',
+        file_type: 'image/png',
+        file_size: 512000, // 500 KB
+        file_url: '/attachments/database_design.png',
+        uploaded_by: 2,
+        uploaded_at: '2025-11-17T10:30:00Z',
+    },
+    {
+        attachment_id: 3,
+        task_id: 2,
+        file_name: 'erd_diagram.pdf',
+        file_type: 'application/pdf',
+        file_size: 1024000, // 1 MB
+        file_url: '/attachments/erd_diagram.pdf',
+        uploaded_by: 3,
+        uploaded_at: '2025-11-18T14:20:00Z',
+    },
+    {
+        attachment_id: 4,
+        task_id: 3,
+        file_name: 'login_flowchart.jpg',
+        file_type: 'image/jpeg',
+        file_size: 307200, // 300 KB
+        file_url: '/attachments/login_flowchart.jpg',
+        uploaded_by: 2,
+        uploaded_at: '2025-11-21T11:00:00Z',
+    },
+];
+
 // --- Mock Task Assignments ---
 export const MOCK_ASSIGNMENTS: ITaskAssignment[] = [
     { assignment_id: 1, user_id: 1, task_id: 1, assigned_date: '2025-11-09T08:00:00Z' },
@@ -129,12 +173,12 @@ export const MOCK_ASSIGNMENTS: ITaskAssignment[] = [
 
 // --- Mock Comments ---
 export const MOCK_COMMENTS: IComment[] = [
-    { comment_id: 1, user_id: 1, task_id: 1, parent_comment_id: null, text: 'Yêu cầu đã được xác nhận, bắt đầu thực hiện.', created_at: '2025-11-10T09:00:00Z' },
-    { comment_id: 2, user_id: 2, task_id: 2, parent_comment_id: null, text: 'Cần thêm thông tin về các trường bảo mật.', created_at: '2025-11-17T08:30:00Z' },
-    { comment_id: 3, user_id: 1, task_id: 2, parent_comment_id: null, text: 'Đã gửi tài liệu bảo mật qua email.', created_at: '2025-11-17T09:00:00Z' },
-    { comment_id: 4, user_id: 3, task_id: 2, parent_comment_id: null, text: 'Hoàn thành mô hình ERD, đang chuyển sang script.', created_at: '2025-11-18T14:00:00Z' },
+    { comment_id: 1, user_id: 1, task_id: 1, parent_comment_id: null, text: 'Yêu cầu đã được xác nhận, bắt đầu thực hiện.', created_at: '2025-11-10T09:00:00Z', category: 'Started' },
+    { comment_id: 2, user_id: 2, task_id: 2, parent_comment_id: null, text: 'Cần thêm thông tin về các trường bảo mật.', created_at: '2025-11-17T08:30:00Z', category: 'Commented' },
+    { comment_id: 3, user_id: 1, task_id: 2, parent_comment_id: null, text: 'Đã gửi tài liệu bảo mật qua email.', created_at: '2025-11-17T09:00:00Z', category: 'Commented' },
+    { comment_id: 4, user_id: 3, task_id: 2, parent_comment_id: null, text: 'Hoàn thành mô hình ERD, đang chuyển sang script.', created_at: '2025-11-18T14:00:00Z', category: 'In Progress' },
     // Reply cho comment_id 3
-    { comment_id: 5, user_id: 2, task_id: 2, parent_comment_id: 3, text: 'Cảm ơn, tôi đã nhận được tài liệu.', created_at: '2025-11-17T09:15:00Z' },
+    { comment_id: 5, user_id: 2, task_id: 2, parent_comment_id: 3, text: 'Cảm ơn, tôi đã nhận được tài liệu.', created_at: '2025-11-17T09:15:00Z', category: 'Commented' },
 ];
 
 // --- Mock Notifications ---
