@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import Login from "./components/authentication/login";
 import Signup from "./components/authentication/signup";
+import ForgotPassword from "./components/authentication/forgotpassword";
 import Dashboard from "./page/dashboard";
 import Tasks from "./page/task";
 import TaskDetail from "./page/taskdetail";
@@ -21,6 +22,7 @@ const App: React.FC = () => {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/tasks/:taskId" element={<TaskDetail />} />

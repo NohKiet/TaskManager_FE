@@ -1,8 +1,15 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../common/sidebar";
 import { MOCK_TASKS, MOCK_USERS, MOCK_ASSIGNMENTS } from "../utils/mockdata";
 import type { ITask, IUser } from "../utils/interfaces";
+import {
+  canCreateTask,
+  canEditTask,
+  canDeleteTask,
+  canUpdateTaskStatus,
+  canAssignEmployees,
+} from "../utils/permissions";
 import "./task.css";
 
 // Extended task type for form (includes tags and attachments)
@@ -33,6 +40,7 @@ type SortDirection = "asc" | "desc";
 
 const Tasks: React.FC = () => {
   const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState<IUser | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("kanban");
   const [tasks, setTasks] = useState<ITask[]>(
     MOCK_TASKS.filter((t) => !t.is_trashed)
@@ -45,6 +53,19 @@ const Tasks: React.FC = () => {
   const [sortField, setSortField] = useState<SortField>("due_date");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [draggedTask, setDraggedTask] = useState<ITask | null>(null);
+
+  // Get current user from localStorage
+  useEffect(() => {
+    const userStr = localStorage.getItem("currentUser");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr) as IUser;
+        setCurrentUser(user);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
+  }, []);
 
   // Mock tags for tasks (in real app, this would come from the database)
   const [taskTags, setTaskTags] = useState<Record<number, string[]>>({
@@ -163,6 +184,11 @@ const Tasks: React.FC = () => {
 
   // Handle drag and drop
   const handleDragStart = (e: React.DragEvent, task: ITask) => {
+    // Only allow dragging if user can update task status
+    if (!canUpdateTaskStatus(currentUser, task)) {
+      e.preventDefault();
+      return;
+    }
     setDraggedTask(task);
     e.dataTransfer.effectAllowed = "move";
   };
@@ -175,6 +201,13 @@ const Tasks: React.FC = () => {
   const handleDrop = (e: React.DragEvent, targetStatus: string) => {
     e.preventDefault();
     if (!draggedTask) return;
+
+    // Check if user can update task status
+    if (!canUpdateTaskStatus(currentUser, draggedTask)) {
+      alert("You don't have permission to update this task's status");
+      setDraggedTask(null);
+      return;
+    }
 
     const newStatus = REVERSE_STATUS_MAP[targetStatus] || "pending";
     setTasks((prevTasks) =>
@@ -190,6 +223,11 @@ const Tasks: React.FC = () => {
   // Handle task creation/update
   const handleSubmitTask = (formData: ITaskForm) => {
     if (selectedTask) {
+      // Check permission to edit
+      if (!canEditTask(currentUser, selectedTask)) {
+        alert("You don't have permission to edit tasks");
+        return;
+      }
       // Update existing task
       // Exclude attachments, tags, and assignees from formData as they're handled separately
       const { attachments, tags, assignees, ...taskData } = formData;
@@ -212,6 +250,11 @@ const Tasks: React.FC = () => {
         }));
       }
     } else {
+      // Check permission to create
+      if (!canCreateTask(currentUser)) {
+        alert("You don't have permission to create tasks");
+        return;
+      }
       // Create new task
       // Exclude attachments, tags, and assignees from formData as they're handled separately
       const { attachments, tags, assignees, ...taskData } = formData;
@@ -236,15 +279,20 @@ const Tasks: React.FC = () => {
     setSelectedTask(null);
   };
 
-  // Handle task deletion
+  // Handle task deletion (soft delete for admin)
   const handleDeleteTask = (taskId: number) => {
+    if (!canDeleteTask(currentUser)) {
+      alert("You don't have permission to delete tasks");
+      return;
+    }
+
     if (window.confirm("Are you sure you want to delete this task?")) {
-      setTasks((prevTasks) => prevTasks.filter((t) => t.task_id !== taskId));
-      setTaskTags((prev) => {
-        const newTags = { ...prev };
-        delete newTags[taskId];
-        return newTags;
-      });
+      // Soft delete: set is_trashed to true
+      setTasks((prevTasks) =>
+        prevTasks.map((t) =>
+          t.task_id === taskId ? { ...t, is_trashed: true } : t
+        )
+      );
     }
   };
 
@@ -341,15 +389,17 @@ const Tasks: React.FC = () => {
 
           <div className="tasks-header-right">
             <span className="task-count">{filteredTasks.length} tasks</span>
-            <button
-              className="new-task-btn"
-              onClick={() => {
-                setSelectedTask(null);
-                setIsFormOpen(true);
-              }}
-            >
-              + New Task
-            </button>
+            {canCreateTask(currentUser) && (
+              <button
+                className="new-task-btn"
+                onClick={() => {
+                  setSelectedTask(null);
+                  setIsFormOpen(true);
+                }}
+              >
+                + New Task
+              </button>
+            )}
           </div>
         </div>
 
@@ -382,49 +432,56 @@ const Tasks: React.FC = () => {
                         >
                           <div className="task-card-header">
                             <h4 className="task-card-title">{task.title}</h4>
-                            <div className="task-card-actions">
-                              <button
-                                className="icon-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedTask(task);
-                                  setIsFormOpen(true);
-                                }}
-                                title="Edit"
-                              >
-                                <svg
-                                  width="16"
-                                  height="16"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                >
-                                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                </svg>
-                              </button>
-                              <button
-                                className="icon-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteTask(task.task_id);
-                                }}
-                                title="Delete"
-                              >
-                                <svg
-                                  width="16"
-                                  height="16"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                >
-                                  <polyline points="3 6 5 6 21 6" />
-                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                </svg>
-                              </button>
-                            </div>
+                            {(canEditTask(currentUser, task) ||
+                              canDeleteTask(currentUser)) && (
+                              <div className="task-card-actions">
+                                {canEditTask(currentUser, task) && (
+                                  <button
+                                    className="icon-btn"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedTask(task);
+                                      setIsFormOpen(true);
+                                    }}
+                                    title="Edit"
+                                  >
+                                    <svg
+                                      width="16"
+                                      height="16"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                    >
+                                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                    </svg>
+                                  </button>
+                                )}
+                                {canDeleteTask(currentUser) && (
+                                  <button
+                                    className="icon-btn"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteTask(task.task_id);
+                                    }}
+                                    title="Delete"
+                                  >
+                                    <svg
+                                      width="16"
+                                      height="16"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                    >
+                                      <polyline points="3 6 5 6 21 6" />
+                                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+                            )}
                           </div>
                           <p className="task-card-description">
                             {task.description}
@@ -592,49 +649,56 @@ const Tasks: React.FC = () => {
                           </span>
                         </td>
                         <td>
-                          <div className="table-actions">
-                            <button
-                              className="icon-btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedTask(task);
-                                setIsFormOpen(true);
-                              }}
-                              title="Edit"
-                            >
-                              <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                              >
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                              </svg>
-                            </button>
-                            <button
-                              className="icon-btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteTask(task.task_id);
-                              }}
-                              title="Delete"
-                            >
-                              <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                              >
-                                <polyline points="3 6 5 6 21 6" />
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                              </svg>
-                            </button>
-                          </div>
+                          {(canEditTask(currentUser, task) ||
+                            canDeleteTask(currentUser)) && (
+                            <div className="table-actions">
+                              {canEditTask(currentUser, task) && (
+                                <button
+                                  className="icon-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedTask(task);
+                                    setIsFormOpen(true);
+                                  }}
+                                  title="Edit"
+                                >
+                                  <svg
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                  >
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                  </svg>
+                                </button>
+                              )}
+                              {canDeleteTask(currentUser) && (
+                                <button
+                                  className="icon-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteTask(task.task_id);
+                                  }}
+                                  title="Delete"
+                                >
+                                  <svg
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                  >
+                                    <polyline points="3 6 5 6 21 6" />
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </td>
                       </tr>
                     );
@@ -657,6 +721,7 @@ const Tasks: React.FC = () => {
             categories={categories}
             existingTags={allTags}
             taskTags={taskTags}
+            currentUser={currentUser}
           />
         )}
       </main>
@@ -672,6 +737,7 @@ interface TaskFormModalProps {
   categories: string[];
   existingTags: string[];
   taskTags: Record<number, string[]>;
+  currentUser: IUser | null;
 }
 
 const TaskFormModal: React.FC<TaskFormModalProps> = ({
@@ -682,6 +748,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
   categories,
   existingTags,
   taskTags,
+  currentUser,
 }) => {
   const [formData, setFormData] = useState<ITaskForm>({
     title: task?.title || "",
@@ -911,25 +978,27 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
             </div>
           </div>
 
-          <div className="form-group">
-            <label>Assignees</label>
-            <div className="assignee-checkboxes">
-              {users.map((user) => (
-                <label key={user.user_id} className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={
-                      formData.assignees?.includes(user.user_id) || false
-                    }
-                    onChange={() => handleToggleAssignee(user.user_id)}
-                  />
-                  <span>
-                    {user.full_name} ({user.username})
-                  </span>
-                </label>
-              ))}
+          {canAssignEmployees(currentUser) && (
+            <div className="form-group">
+              <label>Assignees</label>
+              <div className="assignee-checkboxes">
+                {users.map((user) => (
+                  <label key={user.user_id} className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={
+                        formData.assignees?.includes(user.user_id) || false
+                      }
+                      onChange={() => handleToggleAssignee(user.user_id)}
+                    />
+                    <span>
+                      {user.full_name} ({user.username})
+                    </span>
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="form-group">
             <label>Tags</label>

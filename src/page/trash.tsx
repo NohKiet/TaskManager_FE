@@ -2,12 +2,25 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "../common/sidebar";
 import { MOCK_TASKS, MOCK_USERS, MOCK_ASSIGNMENTS } from "../utils/mockdata";
 import type { ITask, IUser } from "../utils/interfaces";
+import { isAdmin } from "../utils/permissions";
 import "./trash.css";
 
 const Trash: React.FC = () => {
   const [trashedTasks, setTrashedTasks] = useState<ITask[]>([]);
+  const [currentUser, setCurrentUser] = useState<IUser | null>(null);
 
   useEffect(() => {
+    // Get current user from localStorage
+    const userStr = localStorage.getItem("currentUser");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr) as IUser;
+        setCurrentUser(user);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
+
     // Filter tasks that are trashed
     const trashed = MOCK_TASKS.filter((task) => task.is_trashed);
     setTrashedTasks(trashed);
@@ -32,6 +45,11 @@ const Trash: React.FC = () => {
 
   // Handle restore task
   const handleRestore = (taskId: number) => {
+    if (!isAdmin(currentUser)) {
+      alert("You don't have permission to restore tasks");
+      return;
+    }
+
     if (window.confirm("Are you sure you want to restore this task?")) {
       setTrashedTasks((prev) => prev.filter((t) => t.task_id !== taskId));
       // In a real app, this would call an API to restore the task
@@ -41,6 +59,11 @@ const Trash: React.FC = () => {
 
   // Handle permanent delete
   const handleDeletePermanently = (taskId: number) => {
+    if (!isAdmin(currentUser)) {
+      alert("You don't have permission to permanently delete tasks");
+      return;
+    }
+
     if (
       window.confirm(
         "Are you sure you want to permanently delete this task? This action cannot be undone."
@@ -170,48 +193,50 @@ const Trash: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    <div className="trash-item-actions">
-                      <button
-                        className="btn-restore"
-                        onClick={() => handleRestore(task.task_id)}
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                    {isAdmin(currentUser) && (
+                      <div className="trash-item-actions">
+                        <button
+                          className="btn-restore"
+                          onClick={() => handleRestore(task.task_id)}
                         >
-                          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-                          <path d="M21 3v5h-5" />
-                          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-                          <path d="M3 21v-5h5" />
-                        </svg>
-                        Restore
-                      </button>
-                      <button
-                        className="btn-delete"
-                        onClick={() => handleDeletePermanently(task.task_id)}
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                            <path d="M21 3v5h-5" />
+                            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                            <path d="M3 21v-5h5" />
+                          </svg>
+                          Restore
+                        </button>
+                        <button
+                          className="btn-delete"
+                          onClick={() => handleDeletePermanently(task.task_id)}
                         >
-                          <polyline points="3 6 5 6 21 6" />
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                        </svg>
-                        Delete Permanently
-                      </button>
-                    </div>
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          </svg>
+                          Delete Permanently
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })}

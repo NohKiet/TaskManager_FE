@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import Sidebar from "../common/sidebar";
 import { MOCK_USERS } from "../utils/mockdata";
 import type { IUser } from "../utils/interfaces";
+import { canManageTeam } from "../utils/permissions";
 import "./team.css";
 
 const Team: React.FC = () => {
@@ -52,6 +52,21 @@ const Team: React.FC = () => {
     return colors[userId % colors.length];
   };
 
+  const handleToggleUserStatus = (userId: number) => {
+    if (!canManageTeam(currentUser)) {
+      alert("You don't have permission to manage team members");
+      return;
+    }
+
+    setUsers((prevUsers) =>
+      prevUsers.map((user) =>
+        user.user_id === userId
+          ? { ...user, is_active: !user.is_active }
+          : user
+      )
+    );
+  };
+
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar />
@@ -80,12 +95,12 @@ const Team: React.FC = () => {
                   <div className="member-meta">
                     <span
                       className={`member-role ${
-                        user.role === "group leader"
+                        user.role === "admin"
                           ? "role-leader"
                           : "role-member"
                       }`}
                     >
-                      {user.role === "group leader" ? "Group Leader" : "Member"}
+                      {user.role === "admin" ? "Admin" : "Employee"}
                     </span>
                     <span
                       className={`member-status ${
@@ -99,11 +114,14 @@ const Team: React.FC = () => {
                     Joined {formatDate(user.created_at)}
                   </p>
                 </div>
-                {/* {currentUser?.user_id === user.user_id && (
-                  <Link to="/profile" className="member-profile-link">
-                    View Profile
-                  </Link>
-                )} */}
+                {canManageTeam(currentUser) && (
+                  <button
+                    className="toggle-status-btn"
+                    onClick={() => handleToggleUserStatus(user.user_id)}
+                  >
+                    {user.is_active ? "Disable" : "Activate"}
+                  </button>
+                )}
               </div>
             ))}
           </div>
