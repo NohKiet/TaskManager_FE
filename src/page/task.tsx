@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../common/sidebar";
 import { MOCK_TASKS, MOCK_USERS, MOCK_ASSIGNMENTS } from "../utils/mockdata";
 import type { ITask, IUser } from "../utils/interfaces";
@@ -6,9 +7,9 @@ import "./task.css";
 
 // Extended task type for form (includes tags and attachments)
 interface ITaskForm
-  extends Omit<ITask, "task_id" | "created_at" | "updated_at" | "is_trashed"> {
+  extends Omit<ITask, "task_id" | "created_at" | "updated_at" | "is_trashed" | "attachments"> {
   tags?: string[];
-  attachments?: File[];
+  attachments?: File[]; // File objects for upload, not IAttachment objects
   assignees?: number[];
 }
 
@@ -31,6 +32,7 @@ type SortField = "title" | "due_date" | "priority" | "assignee";
 type SortDirection = "asc" | "desc";
 
 const Tasks: React.FC = () => {
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<ViewMode>("kanban");
   const [tasks, setTasks] = useState<ITask[]>(
     MOCK_TASKS.filter((t) => !t.is_trashed)
@@ -189,12 +191,14 @@ const Tasks: React.FC = () => {
   const handleSubmitTask = (formData: ITaskForm) => {
     if (selectedTask) {
       // Update existing task
+      // Exclude attachments, tags, and assignees from formData as they're handled separately
+      const { attachments, tags, assignees, ...taskData } = formData;
       setTasks((prevTasks) =>
         prevTasks.map((task) =>
           task.task_id === selectedTask.task_id
             ? {
                 ...task,
-                ...formData,
+                ...taskData,
                 updated_at: new Date().toISOString(),
               }
             : task
@@ -209,10 +213,12 @@ const Tasks: React.FC = () => {
       }
     } else {
       // Create new task
+      // Exclude attachments, tags, and assignees from formData as they're handled separately
+      const { attachments, tags, assignees, ...taskData } = formData;
       const newTaskId = Math.max(...tasks.map((t) => t.task_id), 0) + 1;
       const newTask: ITask = {
         task_id: newTaskId,
-        ...formData,
+        ...taskData,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         is_trashed: false,
@@ -371,13 +377,16 @@ const Tasks: React.FC = () => {
                           className="task-card"
                           draggable
                           onDragStart={(e) => handleDragStart(e, task)}
+                          onClick={() => navigate(`/tasks/${task.task_id}`)}
+                          style={{ cursor: "pointer" }}
                         >
                           <div className="task-card-header">
                             <h4 className="task-card-title">{task.title}</h4>
                             <div className="task-card-actions">
                               <button
                                 className="icon-btn"
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   setSelectedTask(task);
                                   setIsFormOpen(true);
                                 }}
@@ -397,7 +406,10 @@ const Tasks: React.FC = () => {
                               </button>
                               <button
                                 className="icon-btn"
-                                onClick={() => handleDeleteTask(task.task_id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteTask(task.task_id);
+                                }}
                                 title="Delete"
                               >
                                 <svg
@@ -534,7 +546,11 @@ const Tasks: React.FC = () => {
                   {sortedTasks.map((task) => {
                     const assignees = getTaskAssignees(task.task_id);
                     return (
-                      <tr key={task.task_id}>
+                      <tr 
+                        key={task.task_id}
+                        onClick={() => navigate(`/tasks/${task.task_id}`)}
+                        style={{ cursor: "pointer" }}
+                      >
                         <td>
                           <div className="table-task-title">
                             <strong>{task.title}</strong>
@@ -579,7 +595,8 @@ const Tasks: React.FC = () => {
                           <div className="table-actions">
                             <button
                               className="icon-btn"
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setSelectedTask(task);
                                 setIsFormOpen(true);
                               }}
@@ -599,7 +616,10 @@ const Tasks: React.FC = () => {
                             </button>
                             <button
                               className="icon-btn"
-                              onClick={() => handleDeleteTask(task.task_id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteTask(task.task_id);
+                              }}
                               title="Delete"
                             >
                               <svg

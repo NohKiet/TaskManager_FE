@@ -9,6 +9,7 @@ import Login from "./components/authentication/login";
 import Signup from "./components/authentication/signup";
 import Dashboard from "./page/dashboard";
 import Tasks from "./page/task";
+import TaskDetail from "./page/taskdetail";
 import Team from "./page/team";
 import Trash from "./page/trash";
 import UserProfile from "./page/userprofile";
@@ -22,6 +23,7 @@ const App: React.FC = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/tasks" element={<Tasks />} />
+        <Route path="/tasks/:taskId" element={<TaskDetail />} />
         <Route path="/team" element={<Team />} />
         <Route path="/trash" element={<Trash />} />
         <Route path="/profile" element={<UserProfile />} />
