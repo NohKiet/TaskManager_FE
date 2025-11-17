@@ -300,14 +300,6 @@ const Dashboard: React.FC = () => {
                         )}
                       </div>
                       <div className="muted">{formatTimeAgo(activity.timestamp)}</div>
-            {recentActivity.map((a) => (
-              <div key={a.id} className="activity-item">
-                <div className="activity-left">
-                  <span className="activity-dot" />
-                  <div>
-                    <div>
-                      <strong>{a.user}</strong> {a.action}{" "}
-                      <strong>{a.target}</strong>
                     </div>
                   </div>
                 </div>
