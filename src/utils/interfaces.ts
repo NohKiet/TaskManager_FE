@@ -4,7 +4,7 @@ export interface IUser {
     username: string;
     email: string;
     full_name: string;
-    role: 'group leader' | 'member';
+    role: 'admin' | 'employee';
     created_at: string; // Sử dụng string cho TIMESTAMP/DateTime
     is_active: boolean;
 }
@@ -23,6 +23,19 @@ export interface ITask {
     created_at: string;
     updated_at: string;
     is_trashed: boolean;
+    attachments?: IAttachment[];
+}
+
+// --- 2.1. Attachment Interface ---
+export interface IAttachment {
+    attachment_id: number;
+    task_id: number;
+    file_name: string;
+    file_type: string;
+    file_size: number; // in bytes
+    file_url?: string; // URL or path to the file
+    uploaded_by: number; // user_id
+    uploaded_at: string;
 }
 
 // --- 3. TaskAssignment Interface ---
@@ -41,6 +54,7 @@ export interface IComment {
     parent_comment_id: number | null;
     text: string;
     created_at: string;
+    category?: 'Started' | 'Completed' | 'In Progress' | 'Commented' | 'Bug' | 'Assigned';
 }
 
 // --- 5. Notifications Interface ---

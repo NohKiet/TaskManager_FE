@@ -68,7 +68,7 @@ const Signup: React.FC = () => {
       username: formData.username,
       email: formData.email,
       full_name: formData.username, // TODO: get full name from API
-      role: "member",
+      role: "employee",
       created_at: new Date().toISOString(),
       is_active: true,
     };
